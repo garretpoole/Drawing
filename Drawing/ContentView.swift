@@ -25,8 +25,13 @@ struct Arc: Shape{
     let clockwise: Bool
     
     func path(in rect: CGRect) -> Path {
+        //0 degrees mathematically is to the right in SwiftUI and other languages so must adjust by 90 degrees
+        let rotationAdjustment = Angle.degrees(90)
+        let modifiedStart = startAngle - rotationAdjustment
+        let modifiedEnd = endAngle - rotationAdjustment
+        //Shapes measure coordinates from bottom left corner rather than top left so must flip clockwise to get actual clockwise drawing
         var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: startAngle, endAngle: endAngle, clockwise: clockwise)
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
         return path
     }
 }
@@ -34,8 +39,8 @@ struct Arc: Shape{
 struct ContentView: View {
     var body: some View {
         //main difference with Shapes is reusability
-        Triangle()
-            .stroke(.red, style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
+        Arc(startAngle: .degrees(0), endAngle: .degrees(110), clockwise: true)
+            .stroke(.blue, lineWidth: 10)
             .frame(width: 300, height: 300)
     }
 }
