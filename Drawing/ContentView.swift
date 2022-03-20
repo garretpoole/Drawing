@@ -18,11 +18,13 @@ struct Triangle: Shape{
         return path
     }
 }
-
-struct Arc: Shape{
+//InsettableShape inherits from Shape so no need to confrom to both
+struct Arc: InsettableShape{
     let startAngle: Angle
     let endAngle: Angle
     let clockwise: Bool
+    //make strokeBorder modifier work with Arc through InsettableShape
+    var insetAmount = 0.0
     
     func path(in rect: CGRect) -> Path {
         //0 degrees mathematically is to the right in SwiftUI and other languages so must adjust by 90 degrees
@@ -31,17 +33,23 @@ struct Arc: Shape{
         let modifiedEnd = endAngle - rotationAdjustment
         //Shapes measure coordinates from bottom left corner rather than top left so must flip clockwise to get actual clockwise drawing
         var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2 - insetAmount, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
         return path
+    }
+    
+    func inset(by amount: CGFloat) -> some InsettableShape{
+        var arc = self
+        arc.insetAmount += amount
+        return arc
     }
 }
 
 struct ContentView: View {
     var body: some View {
         //main difference with Shapes is reusability
-        Arc(startAngle: .degrees(0), endAngle: .degrees(110), clockwise: true)
-            .stroke(.blue, lineWidth: 10)
-            .frame(width: 300, height: 300)
+        Arc(startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: true)
+        //strokes inside of the shape border
+            .strokeBorder(.blue, lineWidth: 40)
     }
 }
 
