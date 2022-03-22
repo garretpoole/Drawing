@@ -7,51 +7,44 @@
 
 import SwiftUI
 
-struct ColorCyclingCircle: View{
-    var amount = 0.0
-    var steps = 100
-    
-    var body: some View{
-        ZStack{
-            ForEach(0..<steps) { value in
-                Circle()
-                    .inset(by: Double(value))
-                    .strokeBorder(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                color(for: value, brightness: 1),
-                                color(for: value, brightness: 0.5),
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                            ),
-                        lineWidth: 2)
-            }
-        }
-        //now powered by Apple's METAL framework rather than Core Animation, for high performance gpu graphics
-        //renders contents of view offscreen before putting it on screen as a single piece of rendered output
-        //wait until performance problem as it may actually slow down simple rendering
-        .drawingGroup()
-    }
-    
-    func color(for value: Int, brightness: Double) -> Color{
-        var targetHue = Double(value)/Double(steps) + amount
-        if targetHue > 1{
-            targetHue -= 1
-        }
-        return Color(hue: targetHue, saturation: 1, brightness: brightness)
-    }
-}
-
 struct ContentView: View {
-    @State private var colorCycle = 0.0
+    @State private var amount = 0.0
 
     var body: some View{
         VStack{
-            ColorCyclingCircle(amount: colorCycle)
-                .frame(width: 300, height: 300)
-            Slider(value: $colorCycle)
+            //image with blur and saturation based on slider
+            Image("Example")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200, height: 200)
+                .saturation(amount)
+                .blur(radius: (1-amount)*20)
+            
+            //Three Circle
+//            ZStack{
+//                Circle()
+//                    .fill(Color(red: 1, green: 0, blue: 0))
+//                    .frame(width:200*amount)
+//                    .offset(x: -50, y: -80)
+//                    .blendMode(.screen)
+//                Circle()
+//                    .fill(Color(red: 0, green: 1, blue: 0))
+//                    .frame(width:200*amount)
+//                    .offset(x: 50, y: -80)
+//                    .blendMode(.screen)
+//                Circle()
+//                    .fill(Color(red: 0, green: 0, blue: 1))
+//                    .frame(width:200*amount)
+//                    .blendMode(.screen)
+//            }
+//            .frame(width: 300, height: 300)
+            
+            Slider(value: $amount)
+                .padding()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.black)
+        .ignoresSafeArea()
     }
 }
 
