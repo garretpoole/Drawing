@@ -7,15 +7,51 @@
 
 import SwiftUI
 
-
-struct ContentView: View {
-    @State private var petalOffset = -20.0
-    @State private var petalWidth = 100.0
+struct ColorCyclingCircle: View{
+    var amount = 0.0
+    var steps = 100
     
     var body: some View{
-        Capsule()
-            .strokeBorder(ImagePaint(image: Image("Example"), sourceRect: CGRect(x: 0, y: 0.25, width: 0.25, height: 0.5), scale: 0.1), lineWidth: 20)
-            .frame(width: 300, height: 200)
+        ZStack{
+            ForEach(0..<steps) { value in
+                Circle()
+                    .inset(by: Double(value))
+                    .strokeBorder(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                color(for: value, brightness: 1),
+                                color(for: value, brightness: 0.5),
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                            ),
+                        lineWidth: 2)
+            }
+        }
+        //now powered by Apple's METAL framework rather than Core Animation, for high performance gpu graphics
+        //renders contents of view offscreen before putting it on screen as a single piece of rendered output
+        //wait until performance problem as it may actually slow down simple rendering
+        .drawingGroup()
+    }
+    
+    func color(for value: Int, brightness: Double) -> Color{
+        var targetHue = Double(value)/Double(steps) + amount
+        if targetHue > 1{
+            targetHue -= 1
+        }
+        return Color(hue: targetHue, saturation: 1, brightness: brightness)
+    }
+}
+
+struct ContentView: View {
+    @State private var colorCycle = 0.0
+
+    var body: some View{
+        VStack{
+            ColorCyclingCircle(amount: colorCycle)
+                .frame(width: 300, height: 300)
+            Slider(value: $colorCycle)
+        }
     }
 }
 
